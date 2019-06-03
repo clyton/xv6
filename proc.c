@@ -532,3 +532,115 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int proc_getmeminfo(int pid, char* buf, int len) {
+
+  acquire(&ptable.lock);
+
+  struct proc* p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if(p->state != UNUSED && p->pid == pid)
+      break;
+
+  struct proc uproc = *p;
+
+  if(uproc.pid != pid) {
+    /* cprintf("pid not found %d", pid); */
+    release (&ptable.lock);
+    return -1;
+  }
+
+  if (uproc.pid !=  pid) {
+    cprintf("pid indexed is not equal to proc's pid %d = %d \n", pid, uproc.pid);
+    release(&ptable.lock);
+    return -1;
+  }
+  if (len < strlen(uproc.name))
+    return -1;
+
+  memmove(buf, uproc.name, strlen(uproc.name));
+
+  pde_t *pgdir = uproc.pgdir;
+  pde_t *pde;
+  /* pte_t *pgtab; */
+  /* pte_t *pe; */
+
+  int count = 0;
+  for (pde = pgdir; pde < pgdir + PGSIZE/sizeof(*pgdir); pde++) {
+    if ((*pde & PTE_P) && (*pde & PTE_U)) {
+      count++; // one page for pagetable itself
+	// cprintf("PGSIZE/sizeof(*pgdir)/2 = %d \n", PGSIZE/sizeof(*pgdir)/2);
+      /* pgtab = (pte_t *)P2V(PTE_ADDR(*pde)); */
+      /* for (pe = pgtab; pe < pgtab + 512; pe++) { */
+      /*   if ((*pe & PTE_P) && (*pe & PTE_U)) { */
+      /*     count++; */
+      /*   } */
+      /* } */
+    }
+
+  }
+
+  // now add an additional page for kernel stack
+  // because kernel stack has PTE_U unset
+  // and one more for page directory itself
+  count += 2;
+
+  release(&ptable.lock);
+
+  return count * PGSIZE + uproc.sz;
+
+}
+
+int user_thread_create(void (*fcn)(void *), void *arg, void *stack) {
+
+  int i, pid;
+  struct proc *np;
+  struct proc *curproc = myproc();
+
+  // Allocate process.
+  if((np = allocproc()) == 0){
+    return -1;
+  }
+
+  // child thread points to page table of process
+  np->pgdir = curproc->pgdir;
+
+
+  np->sz = curproc->sz;
+  np->parent = curproc;
+  *np->tf = *curproc->tf;
+
+  // Clear %eax so that fork returns 0 in the child.
+  np->tf->eax = 0;
+
+  for (i = 0; i < NOFILE; i++)
+    if (curproc->ofile[i])
+      np->ofile[i] = filedup(curproc->ofile[i]);
+  np->cwd = idup(curproc->cwd);
+
+  safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+
+  pid = np->pid;
+
+
+  // prepare stack for thread
+  int fake_return = 0xffffffff;
+  stack -= sizeof(fake_return);
+  memmove(stack, &fake_return, sizeof(fake_return));
+
+  stack -= sizeof(fake_return);
+  memmove(stack, arg, sizeof(int));
+
+  // make eip of thread context point to fcn
+  /* np->context->eip = fcn; */
+  np->tf->esp = stack;
+  np->tf->eip = fcn;
+
+  acquire(&ptable.lock);
+
+  np->state = RUNNABLE;
+
+  release(&ptable.lock);
+
+  return pid;
+}

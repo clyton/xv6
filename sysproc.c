@@ -89,3 +89,61 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_memtop(void)
+{
+
+  struct run {
+    struct run *next;
+  };
+
+  char* firstfree = kalloc();
+  struct run *temp = (struct run *) firstfree;
+  int count = 0;
+  while (temp) {
+    temp = temp->next;
+    count++;
+  }
+  kfree(firstfree);
+  return count*PGSIZE;
+
+}
+
+int
+sys_getmeminfo(void) {
+  int pid;
+  char* buf;
+  int len;
+
+  if (argint(0, &pid) < 0)
+    return -1;
+  if (argint(2, &len) < 0)
+    return -1;
+  if (argptr(1, &buf, len) < 0)
+    return -1;
+
+  int bytesUsed = proc_getmeminfo(pid, buf, len);
+  return bytesUsed;
+
+
+}
+
+int sys_thread_create() {
+
+  char *fcn;
+  char *args;
+  char *stack;
+  if (argptr(0, &fcn, sizeof(int)) < 0)
+    return -1;
+
+  if (argptr(1, &args, sizeof(int)) < 0)
+    return -1;
+
+
+  if (argptr(2, &stack, PGSIZE) < 0)
+    return -1;
+
+  int childpid = user_thread_create(fcn, args, stack);
+
+}

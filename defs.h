@@ -120,6 +120,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+int             proc_getmeminfo(int pid, char* buf, int len);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
