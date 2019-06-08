@@ -26,6 +26,8 @@ int uptime(void);
 int memtop(void);
 int getmeminfo(int, char *, int);
 int thread_create(void (*fcn)(void *), void *arg, void *stack);
+int thread_exit();
+int thread_join();
 
 
 // ulib.c

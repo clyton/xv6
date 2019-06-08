@@ -144,6 +144,18 @@ int sys_thread_create() {
   if (argptr(2, &stack, PGSIZE) < 0)
     return -1;
 
-  int childpid = user_thread_create(fcn, args, stack);
+  int childpid = user_thread_create((void *)fcn, (void *)args, (void *)stack);
+  return childpid;
+
+}
+
+int sys_thread_exit() {
+  exit();
+  return 0;
+}
+
+int sys_thread_join() {
+
+  return user_thread_join();
 
 }

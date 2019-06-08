@@ -23,3 +23,5 @@
 #define SYS_memtop  22
 #define SYS_getmeminfo  23
 #define SYS_thread_create  24
+#define SYS_thread_exit  25
+#define SYS_thread_join  26

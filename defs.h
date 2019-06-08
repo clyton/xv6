@@ -121,6 +121,8 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 int             proc_getmeminfo(int pid, char* buf, int len);
+int             user_thread_create(void (*fcn)(void *), void *arg, void *stack);
+int             user_thread_join(void);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
