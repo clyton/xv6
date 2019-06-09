@@ -206,6 +206,8 @@ UPROGS=\
 	_thread\
 	_thread_mutex\
 	_thread_m\
+	_thread_c\
+	_thread_condition\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
