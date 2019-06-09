@@ -2,6 +2,7 @@
 #include "stat.h"
 #include "user.h"
 #include "param.h"
+#include "thread_mutex.h"
 
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
@@ -21,6 +22,7 @@ typedef union header Header;
 static Header base;
 static Header *freep;
 
+static struct thread_mutex memlk ;
 void
 free(void *ap)
 {
@@ -81,10 +83,33 @@ malloc(uint nbytes)
         p->s.size = nunits;
       }
       freep = prevp;
-      return (void*)(p + 1);
+      return (void *)(p + 1);
     }
-    if(p == freep)
-      if((p = morecore(nunits)) == 0)
+    if (p == freep)
+      if ((p = morecore(nunits)) == 0)
         return 0;
   }
+}
+
+void*
+thread_malloc(uint nbytes)
+{
+  thread_mutex_lock(&memlk);
+
+  void *returnval = malloc(nbytes);
+
+  thread_mutex_unlock(&memlk);
+
+  return returnval;
+
+}
+
+void
+thread_free(void *ap)
+{
+  thread_mutex_lock(&memlk);
+
+  free(ap);
+
+  thread_mutex_unlock(&memlk);
 }

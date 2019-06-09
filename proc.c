@@ -303,8 +303,9 @@ wait(void)
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
-        if (curproc->pgdir != p->pgdir)
+        if (!p->isthread)
           freevm(p->pgdir);
+        p->isthread = 0;
         p->pid = 0;
         p->parent = 0;
         p->name[0] = 0;
@@ -680,12 +681,13 @@ user_thread_join(void){
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
-        if (curproc->pgdir != p->pgdir)
+        if (!p->isthread)
           freevm(p->pgdir);
         p->pid = 0;
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
+        p->isthread = 0;
         p->state = UNUSED;
         release(&ptable.lock);
         return pid;
