@@ -689,3 +689,42 @@ user_thread_join(void){
   }
 
 }
+int user_thread_wait(char *chan, uint *lk) {
+
+  struct proc *p = myproc();
+
+  if(p == 0)
+    panic("sleep");
+
+  if(lk == 0)
+    panic("sleep without lk");
+
+  // Must acquire ptable.lock in order to
+  // change p->state and then call sched.
+  // Once we hold ptable.lock, we can be
+  // guaranteed that we won't miss any wakeup
+  // (wakeup runs with ptable.lock locked),
+  // so it's okay to release lk.
+  acquire(&ptable.lock); // DOC: sleeplock1
+  release_mutex(lk);
+  // Go to sleep.
+  p->chan = (void *)chan;
+  p->state = SLEEPING;
+
+  sched();
+
+  // Tidy up.
+  p->chan = 0;
+
+  // Reacquire original lock.
+  release(&ptable.lock);
+  acquire_mutex(lk);
+  return 0;
+}
+
+int user_thread_signal(char *condname) {
+  acquire(&ptable.lock);
+  wakeup1((void *)condname);
+  release(&ptable.lock);
+  return 0;
+}

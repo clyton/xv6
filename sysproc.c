@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "thread_mutex.h"
 
 int
 sys_fork(void)
@@ -158,4 +159,30 @@ int sys_thread_join() {
 
   return user_thread_join();
 
+}
+
+int sys_thread_wait() {
+
+  char *chan;
+  char *clk;
+  int *lk;
+
+  if (argstr(0, &chan) < 0)
+    return -1;
+  if (argptr(1, &clk, sizeof(int)) < 0)
+    return -1;
+
+  lk = (int*) clk;
+
+  return user_thread_wait(chan, (uint *)lk);
+
+}
+
+int sys_thread_signal() {
+
+  char *condname;
+  if (argstr(0, &condname) < 0)
+    return -1;
+
+  return user_thread_signal(condname);
 }

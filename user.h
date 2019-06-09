@@ -28,6 +28,8 @@ int getmeminfo(int, char *, int);
 int thread_create(void (*fcn)(void *), void *arg, void *stack);
 int thread_exit();
 int thread_join();
+int thread_wait(const char *condname, uint *lock);
+int thread_signal(const char *condname);
 
 
 // ulib.c

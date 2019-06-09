@@ -123,6 +123,8 @@ void            yield(void);
 int             proc_getmeminfo(int pid, char* buf, int len);
 int             user_thread_create(void (*fcn)(void *), void *arg, void *stack);
 int             user_thread_join(void);
+int 			user_thread_wait(char *chan, uint *lk);
+int 			user_thread_signal(char *condname);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
