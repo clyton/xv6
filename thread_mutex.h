@@ -9,6 +9,6 @@ struct thread_mutex {
 
 
 void            thread_mutex_lock(struct thread_mutex*);
-int             thread_holding(struct thread_mutex*);
+int             thread_mutex_holding(struct thread_mutex*);
 void            thread_mutex_init(struct thread_mutex*);
 void            thread_mutex_unlock(struct thread_mutex*);

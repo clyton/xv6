@@ -19,7 +19,7 @@ void
 thread_spin_lock(struct thread_spinlock *lk)
 {
   /* thread_pushcli(); // disable interrupts to avoid deadlock. */
-  if(thread_holding(lk))
+  if(thread_spin_holding(lk))
     printf(2, "acquire\n");
 
   // The xchg is atomic.
@@ -37,7 +37,7 @@ thread_spin_lock(struct thread_spinlock *lk)
 void
 thread_spin_unlock(struct thread_spinlock *lk)
 {
-  if(!thread_holding(lk))
+  if(!thread_spin_holding(lk))
     printf(2, "release\n");
 
 
@@ -57,7 +57,7 @@ thread_spin_unlock(struct thread_spinlock *lk)
 // Record the current call stack in pcs[] by following the %ebp chain.
 // Check whether this cpu is thread_holding the lock.
 int
-thread_holding(struct thread_spinlock *lock)
+thread_spin_holding(struct thread_spinlock *lock)
 {
   int r;
   r = lock->locked;

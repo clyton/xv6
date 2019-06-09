@@ -17,7 +17,7 @@ void
 thread_mutex_lock(struct thread_mutex *lk)
 {
   /* thread_pushcli(); // disable interrupts to avoid deadlock. */
-  if(thread_holding(lk))
+  if(thread_mutex_holding(lk))
     printf(2, "acquire\n");
 
   // The xchg is atomic.
@@ -36,7 +36,7 @@ thread_mutex_lock(struct thread_mutex *lk)
 void
 thread_mutex_unlock(struct thread_mutex *lk)
 {
-  if(!thread_holding(lk))
+  if(!thread_mutex_holding(lk))
     printf(2, "release\n");
 
 
@@ -56,7 +56,7 @@ thread_mutex_unlock(struct thread_mutex *lk)
 // Record the current call stack in pcs[] by following the %ebp chain.
 // Check whether this cpu is thread_holding the lock.
 int
-thread_holding(struct thread_mutex *lock)
+thread_mutex_holding(struct thread_mutex *lock)
 {
   int r;
   r = lock->locked;

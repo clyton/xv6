@@ -9,6 +9,6 @@ struct thread_spinlock {
 
 
 void            thread_spin_lock(struct thread_spinlock*);
-int             thread_holding(struct thread_spinlock*);
+int             thread_spin_holding(struct thread_spinlock*);
 void            thread_spin_init(struct thread_spinlock*);
 void            thread_spin_unlock(struct thread_spinlock*);
