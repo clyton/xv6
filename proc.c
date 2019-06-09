@@ -159,19 +159,33 @@ int
 growproc(int n)
 {
   uint sz;
+  uint oldsz;
   struct proc *curproc = myproc();
 
+  acquire(&ptable.lock);
   sz = curproc->sz;
+  oldsz = sz;
   if(n > 0){
-    if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0)
+    if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0) {
+      release(&ptable.lock);
       return -1;
+    }
   } else if(n < 0){
-    if((sz = deallocuvm(curproc->pgdir, sz, sz + n)) == 0)
+    if((sz = deallocuvm(curproc->pgdir, sz, sz + n)) == 0) {
+      release(&ptable.lock);
       return -1;
+    }
   }
+  struct proc *parent = curproc->isthread ? curproc->parent : curproc;
+  parent->sz = sz;
   curproc->sz = sz;
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if(p->isthread && p->parent == parent)
+      p->sz = sz;
   switchuvm(curproc);
-  return 0;
+  release(&ptable.lock);
+  return oldsz;
 }
 
 // Create a new process copying p as the parent.
