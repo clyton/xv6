@@ -1,7 +1,7 @@
 #include "types.h"
 #include "stat.h"
 #include "user.h"
-#include "thread_mutex.h"
+#include "threadlib.h"
 
 struct balance {
     char name[32];

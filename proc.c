@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "threadlib.h"
 
 struct {
   struct spinlock lock;
@@ -639,13 +640,20 @@ int user_thread_create(void (*fcn)(void *), void *arg, void *stack) {
   pid = np->pid;
 
 
+  memset(stack, 0, PGSIZE); // remove garbage
+  stack += PGSIZE; // top of stack
 
-  stack += PGSIZE;
+  // thread local store
+  struct tls tstore;
+  tstore.tid = np->pid - curproc->pid - 1;
+  stack -= sizeof(tstore);
+  memmove(stack, &tstore, sizeof(tstore));
+
+  //    args to threads function
   stack -= sizeof(int);
   memmove(stack, &arg, sizeof(int));
 
-
-  // prepare stack for thread
+  // fake return address after arguments
   int fake_return = 0xffffffff;
   stack -= sizeof(fake_return);
   memmove(stack, &fake_return, sizeof(fake_return));
