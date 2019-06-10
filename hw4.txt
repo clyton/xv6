@@ -1,0 +1,13 @@
+* HW
+1) thread create, exit, join implemented in thread
+2) Thread spinlock is implemented thread and thread mutex is implemented in thread_m
+
+*Extra credits:
+1) Conditional Variables implemented in UPROG = thread_c
+2) Semaphores = Not implemented
+3) Fix sbrk and malloc = Implemented in thread_malloc and thread_sbrk
+4) per thread variables: I have implemented this in thread_localvars.c
+but because of the limitation of the number of user programs I have
+not added '_thread_localvars' in UPROGS.
+To test this please execute thread_cutemacros
+5) cute macros: thread_cutemacros user program created
