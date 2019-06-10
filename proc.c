@@ -640,6 +640,7 @@ int user_thread_create(void (*fcn)(void *), void *arg, void *stack) {
 
 
 
+  stack += PGSIZE;
   stack -= sizeof(int);
   memmove(stack, &arg, sizeof(int));
 
